@@ -58,7 +58,29 @@ public class MemorySpace {
 	 * @return the base address of the allocated block, or -1 if unable to allocate
 	 */
 	public int malloc(int length) {		
-		//// Replace the following statement with your code
+		ListIterator freeIterator = freeList.iterator();
+		while (freeIterator.hasNext()) {
+			MemoryBlock freeCurrentBlock = freeIterator.next();
+
+			// Checking the length of the freeblock
+			if (freeCurrentBlock.length >= length) {
+				// (1) Constructs new memory block
+				MemoryBlock allocatedBlock = new MemoryBlock(freeCurrentBlock.baseAddress, length);
+				// (2) he new memory block is appended to the end of the allocatedList
+				allocatedList.addLast(allocatedBlock);
+
+				if (freeCurrentBlock.length > length) {
+					//(3) The base address and the length of the found free block are updated
+					freeCurrentBlock.baseAddress += length;
+					freeCurrentBlock.length -= length;
+				} else {
+					freeList.remove(freeCurrentBlock);
+				}
+				
+				// (4) The new memory block is returned
+				return allocatedBlock.baseAddress;
+			}
+		}
 		return -1;
 	}
 
@@ -71,7 +93,17 @@ public class MemorySpace {
 	 *            the starting address of the block to freeList
 	 */
 	public void free(int address) {
-		//// Write your code here
+		ListIterator allocIterator = allocatedList.iterator();
+		while (allocIterator.hasNext()) {
+			MemoryBlock allocCurrentBlock = allocIterator.next();
+
+			// removes the block from allocatedList and adds it last to freeList
+			if (allocCurrentBlock.baseAddress == address) {
+				allocatedList.remove(allocCurrentBlock);
+				freeList.addLast(allocCurrentBlock);
+				return;
+			}
+		}
 	}
 	
 	/**
@@ -88,7 +120,22 @@ public class MemorySpace {
 	 * In this implementation Malloc does not call defrag.
 	 */
 	public void defrag() {
-		/// TODO: Implement defrag test
-		//// Write your code here
+		ListIterator freeIterator1 = freeList.iterator();
+		// Looping with 2 iterators on the freeList
+		while (freeIterator1.hasNext()) {
+			MemoryBlock currentBlock = freeIterator1.next();
+			ListIterator freeIterator2 = freeList.iterator();
+
+			while (freeIterator2.hasNext()) {
+				MemoryBlock nextBlock = freeIterator2.next();
+
+				// If possible, merges two free blocks 
+				if (currentBlock.baseAddress + currentBlock.length == nextBlock.baseAddress) {
+					currentBlock.length += nextBlock.length;
+					freeList.remove(nextBlock);
+					break;
+				}
+			}
+		}
 	}
 }
