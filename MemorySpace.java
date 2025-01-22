@@ -1,3 +1,5 @@
+import java.util.Comparator;
+
 /**
  * Represents a managed memory space. The memory space manages a list of allocated 
  * memory blocks, and a list free memory blocks. The methods "malloc" and "free" are 
@@ -79,7 +81,7 @@ public class MemorySpace {
 				
 				// (4) The new memory block is returned
 				return allocatedBlock.baseAddress;
-			}
+			} 
 		}
 		return -1;
 	}
@@ -93,6 +95,11 @@ public class MemorySpace {
 	 *            the starting address of the block to freeList
 	 */
 	public void free(int address) {
+		// checks if allocated list is empty
+		if (allocatedList.getSize() == 0) {
+			throw new IllegalArgumentException("index must be between 0 and size");
+		}
+	
 		ListIterator allocIterator = allocatedList.iterator();
 		while (allocIterator.hasNext()) {
 			MemoryBlock allocCurrentBlock = allocIterator.next();
@@ -121,19 +128,24 @@ public class MemorySpace {
 	 */
 	public void defrag() {
 		ListIterator freeIterator1 = freeList.iterator();
-		// Looping with 2 iterators on the freeList
+	
 		while (freeIterator1.hasNext()) {
 			MemoryBlock currentBlock = freeIterator1.next();
 			ListIterator freeIterator2 = freeList.iterator();
-
+	
 			while (freeIterator2.hasNext()) {
 				MemoryBlock nextBlock = freeIterator2.next();
-
-				// If possible, merges two free blocks 
-				if (currentBlock.baseAddress + currentBlock.length == nextBlock.baseAddress) {
-					currentBlock.length += nextBlock.length;
-					freeList.remove(nextBlock);
-					break;
+	
+				// Ensure we don't compare a block with itself
+				if (currentBlock != nextBlock) {
+					// Check if the blocks can be merged, merges if possible
+					if (currentBlock.baseAddress + currentBlock.length == nextBlock.baseAddress) {
+						currentBlock.length += nextBlock.length;
+						freeList.remove(nextBlock);
+						
+						// Restart the inner iterator to check for further merges
+						freeIterator2 = freeList.iterator();
+					}
 				}
 			}
 		}

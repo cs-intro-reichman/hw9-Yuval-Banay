@@ -137,7 +137,12 @@ public class LinkedList {
 	public void addFirst(MemoryBlock block) {
 		Node newNode = new Node(block);
 		newNode.next = first;
-		first = newNode;
+		if (size == 0) {
+			first = newNode;
+			last = newNode;
+		} else {
+			first = newNode;
+		}
 		size++;
 	}
 
@@ -152,7 +157,7 @@ public class LinkedList {
 	 */
 	public MemoryBlock getBlock(int index) {
 		// Dealing with invalid input
-		if (index < 0 || index > size) {
+		if (index < 0 || index > size || getNode(index) == null) {
 			throw new IllegalArgumentException(
 					"index must be between 0 and size");
 		}
@@ -238,7 +243,7 @@ public class LinkedList {
 		// Dealing with invalid input
 		if (indexOf(block) == -1) {
 			throw new IllegalArgumentException(
-					"This block is not on the list");
+					"index must be between 0 and size");
 		} else {
 			// Removing Node
 			remove(indexOf(block));
@@ -257,14 +262,14 @@ public class LinkedList {
 	 */
 	public String toString() {
 		if (size == 0) {
-			return "()";
+			return "";
 		}
-		String str = "(";
+		String str = "";
 		Node current = first;
 		while (current != null) {
 			str += current.block + " ";
 			current = current.next;
 		}
-		return str.substring(0, str.length() - 1) + ")";
+		return str.substring(0, str.length() - 1) + " ";
 	}
 }
